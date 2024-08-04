@@ -1,0 +1,8 @@
+wandb_version: 1
+
+model__args__lr:
+  value: 3.3765990211615835e-05
+model__params__dim:
+  value: 203
+model__params__dropout:
+  value: 0.050017156222601736

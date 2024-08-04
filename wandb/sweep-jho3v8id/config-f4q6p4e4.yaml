@@ -1,0 +1,66 @@
+wandb_version: 1
+
+data__categorical:
+  value: 'true'
+data__keyword:
+  value: 361055
+data__method_name:
+  value: openml_no_transform
+data__regression:
+  value: 'true'
+max_test_samples:
+  value: 36006
+max_train_samples:
+  value: 6385
+max_val_samples:
+  value: 38969
+model__args__batch_size:
+  value: 130
+model__args__data_parallel:
+  value: 'true'
+model__args__early_stopping_rounds:
+  value: 13
+model__args__epochs:
+  value: 339
+model__args__lr:
+  value: 4.583487751785418e-05
+model__args__model_name:
+  value: saint
+model__args__num_classes:
+  value: 2
+model__args__objective:
+  value: regression
+model__args__use_gpu:
+  value: 'false'
+model__args__val_batch_size:
+  value: 144
+model__params__depth:
+  value: 4
+model__params__dim:
+  value: 91
+model__params__dropout:
+  value: 0.07971522336273182
+model__params__heads:
+  value: 7
+model_name:
+  value: saint
+model_type:
+  value: tab_survey
+n_iter:
+  value: auto
+regression:
+  value: 'false'
+train_prop:
+  value: 1.2893369966790396
+transform__0__apply_on:
+  value: numerical
+transform__0__method_name:
+  value: gaussienize
+transform__0__type:
+  value: quantile
+transformed_target:
+  value: 'false'
+use_gpu:
+  value: 'true'
+val_test_prop:
+  value: 0.3394984312522734

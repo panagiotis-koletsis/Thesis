@@ -1,0 +1,8 @@
+wandb_version: 1
+
+model__args__batch_size:
+  value: 128
+model__params__dropout:
+  value: 0.3
+model__params__heads:
+  value: 8
