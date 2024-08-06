@@ -84,17 +84,17 @@ class Attention(nn.Module):
         return self.to_out(out)
 
 class CrossAttention(nn.Module):
-    def __init__(self, dim, context_dim=None, heads=8, dim_head=16, dropout=0.0):
+    def __init__(self, dim, prototype_dim=None, heads=8, dim_head=16, dropout=0.0):
         super().__init__()
         inner_dim = dim_head * heads
-        context_dim = context_dim or dim  # Use the same dim if context_dim is not specified
+        prototype_dim = prototype_dim or dim  # Use the same dim if context_dim is not specified
 
         self.heads = heads
         self.scale = dim_head ** -0.5
 
         # Layers to project input and context to queries, keys, and values
         self.to_q = nn.Linear(dim, inner_dim, bias=False)
-        self.to_kv = nn.Linear(context_dim, inner_dim * 2, bias=False)
+        self.to_kv = nn.Linear(prototype_dim, inner_dim * 2, bias=False)
 
         # Output projection
         self.to_out = nn.Linear(inner_dim, dim)
@@ -102,7 +102,8 @@ class CrossAttention(nn.Module):
         # Dropout layer
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x, context):
+    #context -> prototypes
+    def forward(self, x, prototypes):
         """
         x: Input tensor for queries, shape (batch_size, feats, dim)
         context: Context tensor for keys and values, shape (context_len, context_dim)
@@ -113,14 +114,14 @@ class CrossAttention(nn.Module):
         q = self.to_q(x)  # (batch_size, inner_dim)
 
         # If context is missing batch dimension, we broadcast it
-        context = repeat(context, 'n d -> b n d', b=x.size(0))
+        prototypes = repeat(prototypes, 'n d -> b n d', b=x.size(0))
 
         # Calculate keys and values from the context
-        k, v = self.to_kv(context).chunk(2, dim=-1)
+        k, v = self.to_kv(prototypes).chunk(2, dim=-1)
 
         # Reshape tensors to separate heads
         #q = rearrange(q, 'b n (h d) -> b h n d', h=h)
-        q = rearrange(q, 'b (h d) -> b h 1 d', h=h)
+        q = rearrange(q, 'b n (h d) -> b h n d', h=h)
         k = rearrange(k, 'b n (h d) -> b h n d', h=h)
         v = rearrange(v, 'b n (h d) -> b h n d', h=h)
 
@@ -134,14 +135,15 @@ class CrossAttention(nn.Module):
 
         # Reshape output and apply final linear layer
         #out = rearrange(out, 'b h n d -> b n (h d)')
-        out = rearrange(out, 'b h 1 d -> b (h d)')
+        out = rearrange(out, 'b h n d -> b n (h d)')
         return self.to_out(out)
 
 class MyRowColTransformer(nn.Module):
     # testing prototype
     #prot_rows
-    def __init__(self, num_tokens, dim, nfeats, depth, heads, dim_head, attn_dropout, ff_dropout,style='col', prot_rows = 128):
+    def __init__(self, num_tokens, dim, nfeats, depth, heads, dim_head, attn_dropout, ff_dropout,style='col', prot_rows = 3):
         super().__init__()
+        print(prot_rows,"prot")
         self.embeds = nn.Embedding(num_tokens, dim)
         self.layers = nn.ModuleList([])
         self.mask_embed =  nn.Embedding(nfeats, dim)
@@ -154,7 +156,7 @@ class MyRowColTransformer(nn.Module):
                 self.layers.append(nn.ModuleList([
                     PreNorm(dim, Residual(Attention(dim, heads = heads, dim_head = dim_head, dropout = attn_dropout))),
                     PreNorm(dim, Residual(FeedForward(dim, dropout = ff_dropout))),
-                    PreNorm(dim*nfeats, Residual(CrossAttention(dim=dim*nfeats, context_dim=dim*nfeats, heads = heads, dim_head = 64, dropout = attn_dropout))),
+                    PreNorm(dim*nfeats, Residual(CrossAttention(dim=dim*nfeats, prototype_dim=dim*nfeats, heads = heads, dim_head = 64, dropout = attn_dropout))),
                     PreNorm(dim*nfeats, Residual(FeedForward(dim*nfeats, dropout = ff_dropout))),
                 ]))
             else:
@@ -173,11 +175,11 @@ class MyRowColTransformer(nn.Module):
                 x = ff1(x)
                 #to be checked
            #     x = rearrange(x, 'b n d -> 1 b (n d)')
-                x = rearrange(x, 'b n d -> b (n d)')
-                x = attn2(x=x, context=self.prototypes)
+                x = rearrange(x, 'b n d -> b 1 (n d)')
+                x = attn2(x=x, prototypes=self.prototypes)
                 x = ff2(x)
            #     x = rearrange(x, '1 b (n d) -> b n d', n = n)
-                x = rearrange(x, ' b (n d) -> b n d', n=n)
+                x = rearrange(x, ' b 1 (n d) -> b n d', n=n)
         else:
              for attn1, ff1 in self.layers:
                 x = rearrange(x, 'b n d -> 1 b (n d)')

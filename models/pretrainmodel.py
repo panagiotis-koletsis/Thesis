@@ -38,8 +38,8 @@ class SAINT(nn.Module):
         scalingfactor = 10,
         attentiontype = 'col',
         final_mlp_style = 'common',
-        y_dim = 2
-
+        y_dim = 2,
+        prot_rows = 32
         ):
         super().__init__()
         assert all(map(lambda n: n > 0, categories)), 'number of each category must be positive'
@@ -107,7 +107,8 @@ class SAINT(nn.Module):
                 dim_head = dim_head,
                 attn_dropout = attn_dropout,
                 ff_dropout = ff_dropout,
-                style = attentiontype
+                style = attentiontype,
+                prot_rows = prot_rows
             )
 
         l = input_size // 8
