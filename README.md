@@ -1,10 +1,11 @@
 Thesis: https://estia.hua.gr/browse/29415 <---  Find More Here  ---
 
 Saint: https://arxiv.org/abs/2106.01342
+
 Tabular benchmark: https://proceedings.neurips.cc/paper_files/paper/2022/file/0378c7692da36807bdec87ab043cdadc-Paper-Datasets_and_Benchmarks.pdf
 
 
-Based on Saint it is proposed a new method which implements cross attention with a prototype trainable-matrix! Our methodology was evaluated according to Tabular benchmark.
+Based on Saint it is proposed a new method which implements cross attention with a prototype trainable-matrix! This approach is evaluated on the Tabular benchmark to assess its effectiveness.
 
 Architecture
 
